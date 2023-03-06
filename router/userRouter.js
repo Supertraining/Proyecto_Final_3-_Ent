@@ -2,7 +2,9 @@ import express from 'express';
 import userContainer from '../api/usersContainer.js';
 import passport from 'passport';
 import { passportLogin, passportRegister, serialDeserial } from '../utils/passport.js';
-import { failLogin, getMycart, getMyUserData, getProducts, getUser, getUserImage, logout, requireAuthentication, savePicturesLocal } from '../controllers/usersController.js';
+import { newOrderNotification, failLogin, getMycart, getMyUserData, getProducts, getUser, getUserImage, logout, requireAuthentication, savePicturesLocal } from '../controllers/usersController.js';
+
+import { routeLogger } from '../utils/logger.js';
 
 const usersContainer = new userContainer();
 
@@ -47,6 +49,8 @@ router.get('/', (req, res) => {
 router.get('/imagen/:username', getUserImage);
 router.get('/miUsuario', getMyUserData);
 router.get('/miCarrito', getMycart);
+router.post('/miCarrito', newOrderNotification);
 router.get('/productos/:tipo?', getProducts);
+
 
 export default router;

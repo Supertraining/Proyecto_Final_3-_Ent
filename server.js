@@ -6,15 +6,13 @@ import userRouter from './router/userRouter.js';
 import passport from 'passport';
 import { connect } from './utils/mongoConnection.js';
 import mongoStore from 'connect-mongo';
+import dotenv from "dotenv";
 import fileUpload from 'express-fileupload';
+import logger, { routeLogger } from './utils/logger.js';
 
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+dotenv.config();
+connect(process.env.MONGO_URL);
 
-
-connect('mongodb+srv://Matias:matias1422@myfirstcluster.lnamsiz.mongodb.net/ecommerce?retryWrites=true&w=majority');
 
 const app = express();
 
@@ -23,12 +21,12 @@ const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 app.use(
 	session({
 		store: mongoStore.create({
-			mongoUrl: 'mongodb+srv://Matias:matias1422@myfirstcluster.lnamsiz.mongodb.net/ecommerce?retryWrites=true&w=majority',
+			mongoUrl: process.env.MONGO_URL,
 			mongoOptions: advancedOptions,
 			collectionName: 'sessions',
 			ttl: 600,
 		}),
-		secret: 'calabaza',
+		secret: process.env.SECRET,
 		resave: false,
 		saveUninitialized: false,
 	})
@@ -42,15 +40,22 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use('/public/images/', express.static('./public/images'));
 app.use('/public/icons', express.static('./public/icons'));
+app.use('/public/js', express.static('./public/js'));
 app.set('view engine', 'ejs');
 
 app.use('/api/productos', productsRouter);
 app.use('/api/carritos', cartsRouter);
 app.use(userRouter);
 
+app.get('/*', async (req, res) => {
+	const { url, method } = await req
+	routeLogger(req, 'warn')
+	res.send(`La ruta ${method} ${url} no esta implementada`)
+})
 
-const PORT = 8080;
+
+const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
-	console.log(`Server listening at ${PORT}`);
+	logger.info(`Server on at ${PORT} - PID: ${process.pid} - ${new Date().toLocaleString()}`);
 });

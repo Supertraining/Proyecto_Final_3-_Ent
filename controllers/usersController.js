@@ -1,6 +1,7 @@
 import userContainer from '../api/usersContainer.js';
 import cartContainers from '../api/cartsContainer.js';
 import ProductContainer from '../api/ProductsContainer.js';
+import { adminNewOrderNotification, userOrderNotification } from '../utils/notifications.js';
 
 const usersContainer = new userContainer();
 const cartsContainer = new cartContainers();
@@ -19,7 +20,7 @@ export const savePicturesLocal = async (req, res, next) => {
 	try {
 		let image = req.files.imagen;
 		image.mv('./public/images/' + `${req.body.username}` + '.jpg');
-		
+
 	} catch (error) {
 		console.log(error);
 	}
@@ -37,17 +38,21 @@ export const getUser = async (req, res) => {
 	});
 }
 
-export const getMyUserData = async (req, res, next) => {
-	let user = await usersContainer.getUser(req.user.username);
-	res.render('usuario', { usuario: user, imagen: user.username })
-	next();
+export const getMyUserData = async (req, res) => {
+	try {
+		let user = await usersContainer.getUser(req.user.username);
+		res.render('usuario', { usuario: user, imagen: user.username })
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 export const getMycart = async (req, res) => {
 	try {
 		let user = await usersContainer.getUser(req.user.username);
 		let carrito = await cartsContainer.getByCartId(user.cartId);
-		res.render('carrito', { carrito: carrito, user: user.username });
+		let compra = Boolean;
+		res.render('carrito', { carrito: carrito, user: user.username, compra: compra });
 
 	} catch (error) {
 		console.log(error);
@@ -71,6 +76,25 @@ export const getProducts = async (req, res) => {
 	} catch (error) {
 		console.log(error);
 	}
+}
+
+export const newOrderNotification = async (req, res) => {
+	const user = await usersContainer.getUser(req.user.username);
+	const carrito = await cartsContainer.getByCartId(user.cartId);
+	const products = carrito.productos;
+	let generateOrder = {};
+	products.forEach(product => {
+		generateOrder[product.nombre] ? generateOrder[product.nombre]++ : generateOrder[product.nombre] = 1;
+	})
+	const newOrder = JSON.stringify(generateOrder);
+	let compra = Boolean;
+	adminNewOrderNotification(user, newOrder);
+	newOrder ? compra = true : compra = false;
+
+	userOrderNotification(user.telefono)
+
+	res.render('carrito', { carrito: carrito, user: user.username, compra: compra });
+
 }
 
 export const logout = (req, res) => {

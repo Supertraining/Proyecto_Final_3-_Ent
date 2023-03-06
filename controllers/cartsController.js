@@ -1,7 +1,5 @@
 import cartsContainer from '../api/cartsContainer.js';
-const cartContainer = new cartsContainer(
-	'mongodb+srv://Matias:matias1422@myfirstcluster.lnamsiz.mongodb.net/ecommerce?retryWrites=true&w=majority'
-);
+const cartContainer = new cartsContainer();
 
 export const getCartProducts = async (req, res) => {
 	let data = await cartContainer.getByCartId(req.params.id);

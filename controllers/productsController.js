@@ -1,7 +1,5 @@
 import ProductsContainer from '../api/ProductsContainer.js';
-const products = new ProductsContainer(
-	'mongodb+srv://Matias:matias1422@myfirstcluster.lnamsiz.mongodb.net/ecommerce?retryWrites=true&w=majority'
-);
+const products = new ProductsContainer();
 
 export const getProducts = async (req, res) => {
 	let data = null;

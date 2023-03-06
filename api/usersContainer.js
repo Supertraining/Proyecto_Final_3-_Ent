@@ -12,7 +12,7 @@ class userContainer {
 			data = await model.usermodel.find({ username: username });
 			return data[0];
 		} catch (err) {
-			console.log('Ocurrio un error' + err);
+			logger.error(err);
 			return (data = null);
 		}
 	}
@@ -22,17 +22,17 @@ class userContainer {
 			let auth = await bcrypt.compare(password, data.password);
 			return auth;
 		} catch (err) {
-			console.log('Ocurrio un error' + err);
+			logger.error(err);
 		}
 	}
 	async insertUser(data) {
 		try {
-			const user = { username: data.username, password: createHash(data.password), nombre: data.nombre, direccion: data.direccion, edad: data.edad, imagen: data.imagen, cartId: data.cartId };
+			const user = { username: data.username, password: createHash(data.password), nombre: data.nombre, direccion: data.direccion, edad: data.edad, telefono: data.telefono, imagen: data.imagen, cartId: data.cartId };
 			await model.usermodel.insertMany(user);
 			let newUser = data;
 			return newUser;
 		} catch (err) {
-			console.log('Ocurrio un error' + err);
+			logger.error(err);
 		}
 	}
 }

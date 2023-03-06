@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import logger from './logger.js'
 
 export const connect = async (url) => {
     try {
@@ -6,8 +7,8 @@ export const connect = async (url) => {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
-        console.log('Base de datos MongDB Atlas conectada');
+        logger.info('Base de datos MongDB Atlas conectada');
     } catch (err) {
-        console.log('ocurrio un error' + err);
+        logger.error(err);
     }
 }

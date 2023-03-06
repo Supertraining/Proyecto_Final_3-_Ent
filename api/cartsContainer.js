@@ -1,20 +1,16 @@
-import mongoose from 'mongoose';
 import Cartmodel from '../models/carts.js';
 import Productmodel from '../models/product.js';
-import { connect } from '../utils/mongoConnection.js';
+import logger from '../utils/logger.js';
 
 class CartContainer {
-	constructor(url) {
-		this.url = url;
-	}
-
+	
 	async createCart(obj) {
 		let newCart = new Cartmodel({ timestamp: Date.now(), ...obj });
 		try {
 			await newCart.save();
 			return newCart;
 		} catch (err) {
-			console.log(`Ocurrio un error ${err}`);
+			logger.error(err);
 		} 
 	}
 	async addProduct(cartId, productId) {
@@ -23,12 +19,12 @@ class CartContainer {
 			let product = await Productmodel.findById(productId);
 			data = await Cartmodel.updateOne({ _id: cartId }, { $push: { productos: product } });
 		} catch (err) {
-			console.log(`Ocurrio un error ${err}`);
+			logger.error(err);
 		} 
 		if (data.modifiedCount) {
-			return `El producto ${productId} se ha añadido correctamente al carrito ${cartId}`;
+			logger.info(`El producto ${productId} se ha añadido correctamente al carrito ${cartId}`); 
 		} else {
-			return 'El productos no ha podido ser añadido';
+			logger.info('El productos no ha podido ser añadido');
 		}
 	}
 
@@ -37,12 +33,12 @@ class CartContainer {
 		try {
 			data = await Cartmodel.findById(id);
 			if (!data) {
-				return `El carrito con el ID ${id} no existe`;
+				logger.info(`El carrito con el ID ${id} no existe`);
 			} else {
 				return data;
 			}
 		} catch (err) {
-			console.log(`Ocurrio un error ${err}`);
+			logger.error(err);
 		}
 	}
 
@@ -51,12 +47,12 @@ class CartContainer {
 		try {
 			data = await Cartmodel.find();
 		} catch (err) {
-			console.log(`Ocurrio un error ${err}`);
+			logger.error(err);
 		} 
 		if (data.length > 0) {
 			return data;
 		} else {
-			return 'La colección esta vacía';
+			logger.info('La colección esta vacía');
 		}
 	}
 
@@ -68,9 +64,9 @@ class CartContainer {
 			console.log(`Ocurrio un error ${err}`);
 		} 
 		if (data.deletedCount) {
-			return `El carrito ${id} ha sido eliminado`;
+			logger.info(`El carrito ${id} ha sido eliminado`);
 		} else {
-			return 'El carrito no existe';
+			logger.info('El carrito no existe');
 		}
 	}
 	async deleteCartProductById(cartId, productId) {
@@ -79,12 +75,12 @@ class CartContainer {
 			let product = await Productmodel.findById(productId);
 			data = await Cartmodel.updateOne({ _id: cartId }, { $pull: { productos: product } });
 		} catch (err) {
-			console.log(`Ocurrio un error ${err}`);
+			logger.error(err);
 		} 
 		if (data.modifiedCount) {
-			return `El producto ${productId} ha sido borrado del carrito ${cartId}`;
+			logger.info(`El producto ${productId} ha sido borrado del carrito ${cartId}`);
 		} else {
-			return 'El productos no ha podido ser borrado';
+			logger.info('El productos no ha podido ser borrado');
 		}
 	}
 }

@@ -2,21 +2,21 @@ import userContainer from '../api/usersContainer.js';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import CartContainer from '../api/cartsContainer.js';
-import sendMailNotification from './userMailNotification.js';
+import { adminNewUserNotification } from './notifications.js';
 
 const cartsContainer = new CartContainer();
 
 const usersContainer = new userContainer();
 
-function serialDeserial(){
-passport.serializeUser((user, done) => {
-	done(null, user.username);
-});
+function serialDeserial() {
+	passport.serializeUser((user, done) => {
+		done(null, user.username);
+	});
 
-passport.deserializeUser(async (username, done) => {
-	let usuario = await usersContainer.getUser(username);
-	done(null, usuario);
-});
+	passport.deserializeUser(async (username, done) => {
+		let usuario = await usersContainer.getUser(username);
+		done(null, usuario);
+	});
 
 }
 
@@ -34,8 +34,8 @@ function passportRegister(req, res, next) {
 					return done(null, false);
 				}
 				
-				let newUser = await usersContainer.insertUser({ username, password, nombre: req.body.nombre, direccion: req.body.direccion, edad: req.body.edad, imagen: `http://localhost:8080/imagen/${req.body.username}`, cartId: cart._id.valueOf() });
-				sendMailNotification(req.body);
+				let newUser = await usersContainer.insertUser({ username, password, nombre: req.body.nombre, direccion: req.body.direccion, edad: req.body.edad, telefono: req.body.Telefono, imagen: `http://localhost:8080/imagen/${req.body.username}`, cartId: cart._id.valueOf() });
+				adminNewUserNotification(req.body);
 				done(null, newUser);
 			}
 		)
