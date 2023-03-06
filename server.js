@@ -47,7 +47,7 @@ app.use('/api/productos', productsRouter);
 app.use('/api/carritos', cartsRouter);
 app.use(userRouter);
 
-app.get('/*', async (req, res) => {
+app.all('/*', async (req, res) => {
 	const { url, method } = await req
 	routeLogger(req, 'warn')
 	res.send(`La ruta ${method} ${url} no esta implementada`)
