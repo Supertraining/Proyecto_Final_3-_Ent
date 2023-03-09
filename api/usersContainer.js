@@ -1,5 +1,6 @@
 import * as model from '../models/user.js';
 import bcrypt from 'bcrypt';
+import logger from '../utils/logger.js';
 
 function createHash(password) {
 	return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
