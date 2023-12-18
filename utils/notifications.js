@@ -1,19 +1,14 @@
 import nodemailer from 'nodemailer';
 import Twilio from 'twilio'
-import dotenv from 'dotenv'
 import logger from './logger.js';
-dotenv.config()
-
-
-const accountSID = process.env.ACCOUNT_SID;
-const authToken = process.env.AUTH_TOKEN;
+import * as config from '../config/config.js';
 
 const transporter = nodemailer.createTransport({
-    service: process.env.SERVICE,
-    port: process.env.GMAIL_PORT,
+    service: config.service,
+    port: config.gmailPort,
     auth: {
-        user: process.env.USER,
-        pass: process.env.PASS
+        user: config.user,
+        pass: config.pass
     },
     tls: {
         rejectUnauthorized: false
@@ -24,7 +19,7 @@ export const adminNewUserNotification = async (newUser) => {
 
     const emailContent = {
         from: `My e-commerce NodeJS app <noreply@example.com>`,
-        to: `"Mati GMAIL" <${process.env.ADMIN_EMAIL}>`,
+        to: `"Mati GMAIL" <${config.adminEmail}>`,
         subject: 'Nuevo registro',
         text: ` Un nuevo usuario ha quedado registrado en nuestra base de datos con los siguientes datos:
         Usuario: ${newUser.username},
@@ -49,7 +44,7 @@ export const adminNewOrderNotification = async (user, newOrder) => {
 
     const emailContent = {
         from: `My e-commerce NodeJS app <noreply@example.com>`,
-        to: `"Mati GMAIL" <${process.env.ADMIN_EMAIL}>`,
+        to: `"Mati GMAIL" <${config.adminEmail}>`,
         subject: `Nuevo pedido de ${user.nombre}, ${user.username}`,
         html: `<p style="font-size: 16px;">${newOrder}</p>`
     }
@@ -59,26 +54,26 @@ export const adminNewOrderNotification = async (user, newOrder) => {
         logger.info('Message sent: %s', info.messageId);
         logger.info('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
-        const client = await Twilio(accountSID, authToken);
+        const client = Twilio(config.accountSID, config.authToken);
         let message = await client.messages
             .create({
                 body: `Nuevo pedido de ${user.nombre}, ${user.username}`,
-                from: `whatsapp:${process.env.TWILIO_NUMBER}`,
-                to: `whatsapp:${process.env.ADMIN_NUMBER}`
+                from: `whatsapp:${config.twilioNumber}`,
+                to: `whatsapp:${config.adminNumber}`
             })
     } catch (error) {
-       logger.error(error);
+        logger.error(error);
     }
 }
 export const userOrderNotification = async (userPhone) => {
     try {
-        const client = await Twilio(accountSID, authToken);
+        const client = Twilio(config.accountSID , config.authToken);
         const message = await client.messages.create({
             body: 'Su pedido ha sido recibido y se encuentra en proceso',
-            from: process.env.TWILIO_NUMBER_SMS,
+            from: config.twilioNumberSms,
             to: `${userPhone}`,
         });
     } catch (error) {
-       logger.error(error);
+        logger.error(error);
     }
 }

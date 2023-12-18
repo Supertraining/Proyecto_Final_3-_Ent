@@ -25,7 +25,7 @@ export const routeLogger = async (req, lvl) => {
 		} else if (lvl == 'warn') {
 			logger.warn(`Ruta ${req.method} ${req.url} no esta implementada`);
 		} else if (lvl == 'err') {
-			logger.error('Ha ocurrido un error');
+			logger.error(`Ha ocurrido un error en la ruta ${req.method} ${req.url}`);	
 		}
 	} catch (err) {
 		logger.error(err);

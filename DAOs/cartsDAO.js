@@ -1,9 +1,10 @@
-import Cartmodel from '../models/carts.js';
-import Productmodel from '../models/product.js';
+import Cartmodel from '../schemas/carts.js';
+import Productmodel from '../schemas/product.js';
 import logger from '../utils/logger.js';
 
-class CartContainer {
-	
+let instance = null;
+export default class CartsDAO {
+
 	async createCart(obj) {
 		let newCart = new Cartmodel({ timestamp: Date.now(), ...obj });
 		try {
@@ -11,7 +12,7 @@ class CartContainer {
 			return newCart;
 		} catch (err) {
 			logger.error(err);
-		} 
+		}
 	}
 	async addProduct(cartId, productId) {
 		let data = null;
@@ -20,9 +21,9 @@ class CartContainer {
 			data = await Cartmodel.updateOne({ _id: cartId }, { $push: { productos: product } });
 		} catch (err) {
 			logger.error(err);
-		} 
+		}
 		if (data.modifiedCount) {
-			logger.info(`El producto ${productId} se ha añadido correctamente al carrito ${cartId}`); 
+			logger.info(`El producto ${productId} se ha añadido correctamente al carrito ${cartId}`);
 		} else {
 			logger.info('El productos no ha podido ser añadido');
 		}
@@ -48,7 +49,7 @@ class CartContainer {
 			data = await Cartmodel.find();
 		} catch (err) {
 			logger.error(err);
-		} 
+		}
 		if (data.length > 0) {
 			return data;
 		} else {
@@ -62,7 +63,7 @@ class CartContainer {
 			data = await Cartmodel.deleteOne({ _id: id });
 		} catch (err) {
 			console.log(`Ocurrio un error ${err}`);
-		} 
+		}
 		if (data.deletedCount) {
 			logger.info(`El carrito ${id} ha sido eliminado`);
 		} else {
@@ -76,13 +77,22 @@ class CartContainer {
 			data = await Cartmodel.updateOne({ _id: cartId }, { $pull: { productos: product } });
 		} catch (err) {
 			logger.error(err);
-		} 
+		}
 		if (data.modifiedCount) {
 			logger.info(`El producto ${productId} ha sido borrado del carrito ${cartId}`);
 		} else {
 			logger.info('El productos no ha podido ser borrado');
 		}
 	}
+
+	static getInstance() {
+		if (!instance) {
+			instance = new CartsDAO();
+			logger.info('Se ha creado una instancia de CartsDAO');
+
+		}
+		logger.info('Se ha utilizado una instancia ya creada de CartsDAO');
+		return instance
+	}
 }
 
-export default CartContainer;

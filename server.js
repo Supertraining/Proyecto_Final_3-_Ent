@@ -1,35 +1,21 @@
 import express, { json, urlencoded } from 'express';
 import session from 'express-session';
-import productsRouter from './router/routerProducts.js';
-import cartsRouter from './router/routerCarts.js';
-import userRouter from './router/userRouter.js';
+import ProductsRouter from './router/products.js';
 import passport from 'passport';
 import { connect } from './utils/mongoConnection.js';
-import mongoStore from 'connect-mongo';
-import dotenv from "dotenv";
 import fileUpload from 'express-fileupload';
 import logger, { routeLogger } from './utils/logger.js';
+import UserRouter from './router/userRouter.js';
+import CartsRouter from './router/routerCarts.js';
+import * as config from './config/config.js';
 
-dotenv.config();
-connect(process.env.MONGO_URL);
 
+connect(config.mongoURL);
 
 const app = express();
 
-const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
-
 app.use(
-	session({
-		store: mongoStore.create({
-			mongoUrl: process.env.MONGO_URL,
-			mongoOptions: advancedOptions,
-			collectionName: 'sessions',
-			ttl: 600,
-		}),
-		secret: process.env.SECRET,
-		resave: false,
-		saveUninitialized: false,
-	})
+	session(config.sessionConfig)
 );
 
 
@@ -43,18 +29,22 @@ app.use('/public/icons', express.static('./public/icons'));
 app.use('/public/js', express.static('./public/js'));
 app.set('view engine', 'ejs');
 
-app.use('/api/productos', productsRouter);
-app.use('/api/carritos', cartsRouter);
-app.use(userRouter);
+const productsRouter = new ProductsRouter();
+const userRouter = new UserRouter();
+const cartsRouter = new CartsRouter
 
-app.all('/*', async (req, res) => {
-	const { url, method } = await req
+app.use('/api/productos', productsRouter.start());
+app.use('/api/carritos', cartsRouter.start());
+app.use(userRouter.start());
+
+app.all('/*', (req, res) => {
+	const { url, method } = req
 	routeLogger(req, 'warn')
 	res.send(`La ruta ${method} ${url} no esta implementada`)
 })
 
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.argv[2] || config.port;
 
 app.listen(PORT, () => {
 	logger.info(`Server on at ${PORT} - PID: ${process.pid} - ${new Date().toLocaleString()}`);
